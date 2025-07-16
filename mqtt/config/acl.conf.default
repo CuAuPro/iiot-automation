@@ -1,0 +1,10 @@
+
+
+# All users
+pattern read $SYS/#
+pattern read #
+
+# # Only allow authenticated clients
+# user user-name
+# topic readwrite #
+

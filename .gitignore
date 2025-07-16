@@ -1,0 +1,33 @@
+# Ignore all volume directories for services
+mqtt/volume/
+node-red/volume/
+fuxa/volume/
+
+# General
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# Node modules (if any Node.js work is done outside of Docker)
+node_modules/
+
+# Docker-related
+*.tar
+**/Dockerfile.*.bak
+docker-compose.override.yml
+
+# Backup files
+*~
+*.bak
+*.old
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.code-workspace
+
+# OS-specific
+ehthumbs.db
+desktop.ini

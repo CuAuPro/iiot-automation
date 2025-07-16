@@ -1,0 +1,66 @@
+services:
+  databus:
+    container_name: databus
+    build:
+      context: ./mqtt
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    hostname: databus
+    ports:
+      - "1883:1883"    # MQTT
+      - "8883:8883"    # mqtt
+      - "8083:8083"    # MQTT WebSocket Secure (if enabled)
+    environment:
+      MQTT_USER: ${MQTT_USER:-admin}  # Default to 'admin' if MQTT_USER is not set
+      MQTT_PASS: ${MQTT_PASS:-adminPassword}  # Default to 'adminPassword' if MQTT_PASS is not set
+    volumes:
+      - ./mqtt/volume/certs:/etc/mosquitto/certs
+      - ./mqtt/volume/credentials:/etc/mosquitto/credentials
+      - ./mqtt/volume/config/mosquitto.conf:/etc/mosquitto/mosquitto.conf:ro
+      - ./mqtt/volume/config/acl.conf:/etc/mosquitto/acl.conf:ro
+    networks:
+      - iot-network
+
+  node-red:
+    container_name: node-red
+    build:
+      context: ./node-red
+      dockerfile: Dockerfile
+      args:
+        node_red_version: "latest"
+    restart: unless-stopped
+    user: "root"
+    ports:
+      - "1880:1880"
+      - "54840:54840"
+      - "14840:4840"
+    volumes:
+      - ./node-red/volume/data:/data
+      - ./node-red/volume/flows:/usr/flows
+      - ./node-red/volume/certs:/usr/certs
+      - ./node-red/volume/custom-nodes:/usr/custom-nodes
+      - ./node-red/volume/custom-icons:/usr/custom-icons
+      - ./node-red/volume/settings.js:/usr/settings.js
+    environment:
+      - TZ=${TZ:-Europe/Ljubljana}  # Default to Europe/Ljubljana if TZ is not set
+      - FORCE_REINSTALL=${FORCE_REINSTALL:-false}  # Default to 'false' if FORCE_REINSTALL is not set
+    networks:
+      - iot-network
+
+  fuxa:
+    container_name: fuxa
+    image: frangoteam/fuxa:latest
+    restart: unless-stopped
+    ports:
+      - "1881:1881"
+    volumes:
+      - ./fuxa/volume/appdata:/usr/src/app/FUXA/server/_appdata
+      - ./fuxa/volume/db:/usr/src/app/FUXA/server/_db
+      - ./fuxa/volume/logs:/usr/src/app/FUXA/server/_logs
+      - ./fuxa/volume/images:/usr/src/app/FUXA/server/_images
+    networks:
+      - iot-network
+
+networks:
+  iot-network:
+    driver: bridge
